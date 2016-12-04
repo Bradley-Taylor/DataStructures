@@ -1,0 +1,204 @@
+package BinarySearchTree;
+/**
+ * @author Bradley Taylor
+ * 
+ * Binary Search tree methods. insert and a node to the tree. inOrderPrint prints the tree in
+ * acending order. printTree prints the three level by level.  exists says weather or not a value exists. balance 
+ * balances the tree so that is has the least possible amount of levels.
+ */
+import java.util.*;
+
+public class BST<T extends Comparable<T>> {
+	BSTNode<T> root;
+	int size = 0;
+
+	/**
+	 * insert a single element into the tree. It is potentially possible to mess
+	 * up the tree by modifying an element after insertion.
+	 * 
+	 * @param in the element to insert
+	 */
+	public void insert(T in) {
+		if (in == null)
+			return;
+		BSTNode<T> bin = new BSTNode<T>();
+		bin.set(in);
+		if (root == null) {
+			root = bin;
+		} else {
+			insert_re(root, bin);
+		}
+		size++;
+	}
+
+	private void insert_re(BSTNode parent, BSTNode insertMe) {
+		if (parent.getc().compareTo(insertMe.getc()) > 0) {
+			if (parent.getLeft() == null) {
+				parent.setLeft(insertMe);
+			} else {
+				insert_re(parent.getLeft(), insertMe);
+			}
+		} else {
+			if (parent.getRight() == null) {
+				parent.setRight(insertMe);
+			} else {
+				insert_re(parent.getRight(), insertMe);
+			}
+		}
+	}
+
+	/**
+	 * in order traversal of the tree, using println to output the elements
+	 */
+	public void inOrderPrint() {
+		if (root != null) {
+			inOrderPrint_re(root);
+		}
+	}
+
+	private void inOrderPrint_re(BSTNode<T> parent) {
+		if (parent == null)
+			return;
+		inOrderPrint_re(parent.getLeft());
+		System.out.println(parent.get());
+		inOrderPrint_re(parent.getRight());
+	}
+
+	/**
+	 * See if an element exists in the tree
+	 * 
+	 * @param q element to search for in the tree
+	 * @return true if an element in the tree is equal to the q, false otherwise
+	 */
+	public boolean exists(T q) {
+		return exists_re(q, root);
+	}
+
+	private boolean exists_re(T q, BSTNode<T> parent) {
+		if (parent == null)
+			return false;
+		if (((Comparable) q).compareTo(parent.getc()) == 0) {
+			return true;
+		} else if (((Comparable) q).compareTo(parent.getc()) < 0) {
+			return exists_re(q, parent.getLeft());
+		} else {
+			return exists_re(q, parent.getRight());
+		}
+	}
+	/**
+	 * prints the tree in breadth-first order
+	 */
+	public void printTree() {
+		printTreeHelp(root);
+	}
+
+	private void printTreeHelp(BSTNode curr) {
+		if (curr != null) {
+			Queue<BSTNode> level1 = new LinkedList<BSTNode>(); //current level being worked on
+			Queue<BSTNode> level2 = new LinkedList<BSTNode>(); //next level to be worked on
+			int treeHeight = height(curr); 
+			int levelTotal = 0;
+			level1.add(curr);
+			while (!level1.isEmpty() && (levelTotal < treeHeight)) {
+				while (!level1.isEmpty()) {
+					System.out.print(level1.peek().get() + "\t");
+					curr = level1.peek().getLeft();
+					if (curr != null) {
+						level2.add(curr);
+					} else {
+						level2.add(new BSTNode(null));
+					}
+					curr = level1.remove().getRight();
+					if (curr != null) {
+						level2.add(curr);
+					} else {
+						level2.add(new BSTNode(null));
+					}
+				}
+				while (!level2.isEmpty()) {
+					level1.add(level2.remove());
+				}
+				System.out.println("");
+				levelTotal++;
+			}
+		}
+	}
+
+	private int height(BSTNode curr) {
+		if (curr == null) {
+			return 0;
+		}
+		int leftHeight = height(curr.getLeft());
+		int rightHeight = height(curr.getRight());
+
+		if (leftHeight >= rightHeight) {
+			return leftHeight + 1;
+		} else {
+			return rightHeight + 1;
+		}
+	}
+
+	/**
+	 * balances the tree so it has the least possible levels
+	 */
+	public void balance() {
+		ArrayList<T> bal = new ArrayList<T>();
+		inArrayList(bal, root);
+		root = null;
+		balanceHelp(bal);
+	}
+
+	private void balanceHelp(List<T> bal) {
+		if(bal.size() > 2) {
+			insert(bal.get(bal.size() / 2));
+			balanceHelp(bal.subList(0, bal.size() / 2));
+			balanceHelp(bal.subList(bal.size() / 2 + 1, bal.size()));
+		} else if (bal.size() == 2) {
+			Collections.sort(bal);
+			insert(bal.get(0));
+			insert(bal.get(1));
+		} else if (bal.size() < 2){
+			insert(bal.get(0));
+		}
+	}
+
+	private void inArrayList(ArrayList<T> bal, BSTNode curr) {
+		if (curr != null) {
+			inArrayList(bal, curr.getLeft());
+			bal.add((T) curr.get());
+			inArrayList(bal, curr.getRight());
+		}
+	}
+
+	public class BSTNode<T> {
+		T val;
+		BSTNode left;
+		BSTNode right;
+		public BSTNode(T value) {
+			val = value;
+		}
+		public BSTNode() {
+		}
+		BSTNode getLeft() {
+			return left;
+		}
+		BSTNode getRight() {
+			return right;
+		}
+		void setLeft(BSTNode bn) {
+			left = bn;
+		}
+		void setRight(BSTNode bn) {
+			right = bn;
+		}
+		T get() {
+			return val;
+		}
+		void set(T v) {
+			val = v;
+		}
+		Comparable getc() {
+			return (Comparable) val;
+		}
+	}
+}
